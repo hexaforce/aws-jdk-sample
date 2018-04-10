@@ -1,6 +1,7 @@
 package io.hexaforce.aws.SQS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -27,33 +28,62 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SimpleQueueService extends AmazoneClientBuilder {
 
-	public static void createQueue() {
-
+	/**
+	 * @param value
+	 * @return
+	 */
+	public static QueueObject createQueue(QueueObject value) {
+		return createQueues(Arrays.asList(value)).get(0);
 	}
 
-	public static void createQueues() {
+	/**
+	 * @param values
+	 * @return
+	 */
+	public static List<QueueObject> createQueues(List<QueueObject> values) {
 		AmazonSQS sqs = buildSQSClient();
 
+		return values;
 	}
 
-	public static void deleteQueue() {
-
+	/**
+	 * @param value
+	 * @return
+	 */
+	public static QueueObject deleteQueue(QueueObject value) {
+		return deleteQueues(Arrays.asList(value)).get(0);
 	}
 
-	public static void deleteQueues() {
+	/**
+	 * @param values
+	 * @return
+	 */
+	public static List<QueueObject> deleteQueues(List<QueueObject> values) {
 		AmazonSQS sqs = buildSQSClient();
 
+		return values;
 	}
 
+	/**
+	 * @return
+	 */
 	public static List<String> listQueueUrls() {
 		AmazonSQS sqs = buildSQSClient();
 		return sqs.listQueues().getQueueUrls();
 	}
 
-	public static void sendMessage() {
-
+	/**
+	 * @param value
+	 * @return
+	 */
+	public static QueueObject sendMessage(QueueObject value) {
+		return sendMessage(Arrays.asList(value)).get(0);
 	}
 
+	/**
+	 * @param values
+	 * @return
+	 */
 	public static List<QueueObject> sendMessage(List<QueueObject> values) {
 
 		AmazonSQS sqs = buildSQSClient();
@@ -67,6 +97,10 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 
 	}
 
+	/**
+	 * @param queueUrl
+	 * @return
+	 */
 	public static List<QueueObject> receiveMessage(String queueUrl) {
 
 		AmazonSQS sqs = buildSQSClient();
@@ -85,10 +119,18 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 
 	}
 
-	public static void deleteMessage() {
-
+	/**
+	 * @param value
+	 * @return
+	 */
+	public static QueueObject deleteMessage(QueueObject value) {
+		return deleteMessage(Arrays.asList(value)).get(0);
 	}
 
+	/**
+	 * @param values
+	 * @return
+	 */
 	public static List<QueueObject> deleteMessage(List<QueueObject> values) {
 
 		AmazonSQS sqs = buildSQSClient();
