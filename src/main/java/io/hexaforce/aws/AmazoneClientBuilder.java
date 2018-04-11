@@ -7,11 +7,13 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsync;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsyncClientBuilder;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 
 /**
@@ -21,6 +23,8 @@ import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
  */
 public class AmazoneClientBuilder {
 
+	final static ProfileCredentialsProvider credentialsProviderS3 = new ProfileCredentialsProvider("S3");
+	
 	/**
 	 * @return
 	 */
@@ -32,7 +36,7 @@ public class AmazoneClientBuilder {
 		 */
 		try {
 
-			AWSCredentials credentials = new ProfileCredentialsProvider("S3").getCredentials();
+			AWSCredentials credentials = credentialsProviderS3.getCredentials();
 			AWSStaticCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
 			AmazonS3 s3 = AmazonS3ClientBuilder.standard()
 					.withCredentials(provider)
@@ -47,7 +51,35 @@ public class AmazoneClientBuilder {
 		}
 
 	}
+	
+	/**
+	 * @return
+	 */
+	protected static AmazonS3 buildEncryptionS3Client() {
 
+		/*
+		 * The ProfileCredentialsProvider will return your [default] credential profile
+		 * by reading from the credentials file located at (~/.aws/credentials).
+		 */
+		try {
+
+			AWSCredentials credentials = credentialsProviderS3.getCredentials();
+			AWSStaticCredentialsProvider provider = new AWSStaticCredentialsProvider(credentials);
+			AmazonS3 s3 = AmazonS3EncryptionClientBuilder.standard()
+					.withCredentials(provider)
+					.withRegion(Regions.AP_NORTHEAST_1)
+					.build();
+			return s3;
+
+		} catch (Exception e) {
+			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
+					+ "Please make sure that your credentials file is at the correct location (~/.aws/credentials), and is in valid format.",
+					e);
+		}
+
+	}
+	final static ProfileCredentialsProvider credentialsProviderSES = new ProfileCredentialsProvider("SES");
+	
 	/**
 	 * @return
 	 */
@@ -63,9 +95,8 @@ public class AmazoneClientBuilder {
 		 * credentials file in your source directory.
 		 */
 		try {
-			ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("SES");
 			AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder.standard()
-					.withCredentials(credentialsProvider)
+					.withCredentials(credentialsProviderSES)
 					.withRegion(Regions.US_WEST_2).build();
 			return client;
 			
@@ -92,9 +123,9 @@ public class AmazoneClientBuilder {
 		 * credentials file in your source directory.
 		 */
 		try {
-			ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("SES");
+			
 			AmazonSimpleEmailServiceAsync client = AmazonSimpleEmailServiceAsyncClientBuilder.standard()
-					.withCredentials(credentialsProvider)
+					.withCredentials(credentialsProviderSES)
 					.withRegion(Regions.US_WEST_2)
 					.build();
 			return client;
@@ -107,7 +138,7 @@ public class AmazoneClientBuilder {
 
 	}
 
-	ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("SQS");
+	final static ProfileCredentialsProvider credentialsProviderSQS = new ProfileCredentialsProvider("SQS");
 
 	/**
 	 * @return
@@ -119,13 +150,11 @@ public class AmazoneClientBuilder {
 		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
 		try {
-
-			ProfileCredentialsProvider provider = new ProfileCredentialsProvider("SQS");
+			
 			AmazonSQS sqs = AmazonSQSClientBuilder.standard()
-					.withCredentials(provider)
+					.withCredentials(credentialsProviderSQS)
 					.withRegion(Regions.AP_NORTHEAST_1)
 					.build();
-
 			return sqs;
 
 		} catch (Exception e) {
@@ -135,5 +164,29 @@ public class AmazoneClientBuilder {
 		}
 
 	}
+	
+	/**
+	 * @return
+	 */
+	protected static AmazonSQS buildAsyncSQSClient() {
 
+		/*
+		 * The ProfileCredentialsProvider will return your [default] credential profile
+		 * by reading from the credentials file located at (~/.aws/credentials).
+		 */
+		try {
+			
+			AmazonSQS sqs = AmazonSQSAsyncClientBuilder.standard()
+					.withCredentials(credentialsProviderSQS)
+					.withRegion(Regions.AP_NORTHEAST_1)
+					.build();
+			return sqs;
+
+		} catch (Exception e) {
+			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
+					+ "Please make sure that your credentials file is at the correct location (~/.aws/credentials), and is in valid format.",
+					e);
+		}
+
+	}
 }

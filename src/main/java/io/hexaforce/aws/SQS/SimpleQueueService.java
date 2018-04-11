@@ -1,6 +1,5 @@
 package io.hexaforce.aws.SQS;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +9,6 @@ import org.apache.commons.beanutils.BeanUtils;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
@@ -23,7 +21,6 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 
 import io.hexaforce.aws.AmazoneClientBuilder;
-import io.hexaforce.aws.S3.StorageObject;
 import lombok.extern.slf4j.Slf4j;
 
 /**

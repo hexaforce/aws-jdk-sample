@@ -23,6 +23,10 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import io.hexaforce.aws.AmazoneClientBuilder;
 
+/**
+ * @author tantaka
+ *
+ */
 public class SimpleStorageService extends AmazoneClientBuilder {
 
 	/**
@@ -83,7 +87,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	}
 
 	/**
-	 * バケット一覧
+	 * バケット一覧を取得します
 	 * 
 	 * @return
 	 */

@@ -9,6 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author tantaka
+ *
+ */
 @Slf4j
 public class SESNotificationAnalyzer {
 
@@ -17,7 +21,8 @@ public class SESNotificationAnalyzer {
 		try {
 
 			ObjectMapper jackson = new ObjectMapper()
-					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+					false);
 
 			JsonNode root = trimIndention(jackson, body);
 
@@ -27,31 +32,34 @@ public class SESNotificationAnalyzer {
 			}
 
 			MailObject mailObject = jackson.readValue(root.get("mail").toString(), MailObject.class);
-			log.info("TargetMail :{}", mailObject);
+			log.debug("TargetMail :{}", mailObject);
 
 			switch (type) {
-			
+
 			case Delivery:
-				
-				DeliveryObject deliveryObject = 
-					jackson.readValue(root.get("delivery").toString(), DeliveryObject.class);
-				log.info("Delivery :{}", deliveryObject);
+
+				String delivery = root.get("delivery").toString();
+				DeliveryObject deliveryObject = jackson.readValue(delivery, DeliveryObject.class);
+
+				log.debug("Delivery :{}", deliveryObject);
 				break;
-				
+
 			case Bounce:
+
+				String bounce = root.get("bounce").toString();
+				BounceObject bounceObject = jackson.readValue(bounce, BounceObject.class);
 				
-				BounceObject bounceObject = 
-					jackson.readValue(root.get("bounce").toString(), BounceObject.class);
 				log.warn("Bounce :{}", bounceObject);
 				break;
-				
+
 			case Complaint:
+
+				String complaint = root.get("complaint").toString();
+				ComplaintObject complaintObject = jackson.readValue(complaint, ComplaintObject.class);
 				
-				ComplaintObject complaintObject = 
-					jackson.readValue(root.get("complaint").toString(), ComplaintObject.class);
 				log.error("Complaint :{}", complaintObject);
 				break;
-				
+
 			default:
 
 				break;
@@ -64,13 +72,14 @@ public class SESNotificationAnalyzer {
 	}
 
 	/**
+	 * メッセージ内容を正規化します
 	 * @param body
 	 * @return
 	 */
 	private static JsonNode trimIndention(ObjectMapper jackson, String body) {
 		try {
-			JsonNode x = jackson.readTree(body).get("Message");
-			return jackson.readTree(x.asText());
+			JsonNode message = jackson.readTree(body).get("Message");
+			return jackson.readTree(message.asText());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -78,6 +87,11 @@ public class SESNotificationAnalyzer {
 
 	}
 
+	/**
+	 * SESの送信通知のタイプを返します
+	 * @param root
+	 * @return
+	 */
 	private static NotificationType checkNotificationType(JsonNode root) {
 		String notificationType = root.get("notificationType").asText();
 		try {
