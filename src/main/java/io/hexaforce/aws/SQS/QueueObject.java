@@ -5,14 +5,28 @@ import lombok.Data;
 @Data
 public class QueueObject {
 	
+
 	private String queueUrl;
-	private String messageBody;
 	
-	private String messageId;
+	/**A unique identifier for the message. */
+    private String messageId;
+    
+    /** An identifier associated with the act of receiving the message. */
+    private String receiptHandle;
+    
+    /** An MD5 digest of the non-URL-encoded message body string. */
+    private String mD5OfBody;
+    
+    /** The message's contents (not URL-encoded). */
+    private String body;
+    
+    /** An MD5 digest of the non-URL-encoded message attribute string. */
+    private String mD5OfMessageAttributes;
+    
+	
 	private String requestId;
 	private String sequenceNumber;
 	private int httpStatusCode;
 
-	private String receiptHandle;
 	
 }

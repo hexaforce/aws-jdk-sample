@@ -4,14 +4,20 @@ import lombok.Data;
 
 @Data
 public class EmailObject {
-
+	
+	/**************************
+	 * Request
+	 **************************/
 	private String from;
 	private String to;
 	private String subject;
 	private String body;
 
-	private int resultHttpStatusCode;
-	private String resultMessageId;
-	private String resultRequestId;
+	/**************************
+	 * Response
+	 **************************/
+	private int httpStatusCode;
+	private String messageId;
+	private String requestId;
 	
 }

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.beanutils.BeanUtils;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -29,7 +31,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param bucketName
 	 * @return Bucket
 	 */
-	public static Bucket createBucket(String bucketName) {
+	public static StorageObject createBucket(String bucketName) {
 		return createBucket(Arrays.asList(bucketName)).get(0);
 	}
 
@@ -39,17 +41,20 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param bucketNames
 	 * @return
 	 */
-	public static List<Bucket> createBucket(List<String> bucketNames) {
+	public static List<StorageObject> createBucket(List<String> bucketNames) {
 		AmazonS3 s3 = buildS3Client();
-		List<Bucket> bucketList = new ArrayList<>();
+		List<StorageObject> result = new ArrayList<>();
 		for (String bucketName : bucketNames) {
 			try {
-				bucketList.add(s3.createBucket(bucketName));
+				Bucket bucket = s3.createBucket(bucketName);
+				StorageObject o = new StorageObject();
+				BeanUtils.copyProperties(o, bucket);
+				result.add(o);
 			} catch (Exception e) {
 				displayException(e);
 			}
 		}
-		return bucketList;
+		return result;
 	}
 
 	/**
@@ -97,11 +102,14 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 		AmazonS3 s3 = buildS3Client();
 		ListObjectsRequest serchRequest = new ListObjectsRequest().withBucketName(bucketName).withPrefix(prefix);
 		List<StorageObject> result = new ArrayList<>();
-		for (S3ObjectSummary summary : s3.listObjects(serchRequest).getObjectSummaries()) {
-			StorageObject o = new StorageObject();
-			o.setBucketName(summary.getBucketName());
-			o.setKey(summary.getKey());
-			result.add(o);
+		try {
+			for (S3ObjectSummary summary : s3.listObjects(serchRequest).getObjectSummaries()) {
+				StorageObject o = new StorageObject();
+				BeanUtils.copyProperties(o, summary);
+				result.add(o);
+			}
+		} catch (Exception e) {
+			displayException(e);
 		}
 		return result;
 	}

@@ -1,10 +1,7 @@
 package io.hexaforce.aws.SES;
 
-import static java.lang.System.out;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsync;
@@ -16,11 +13,13 @@ import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendEmailResult;
 
 import io.hexaforce.aws.AmazoneClientBuilder;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author tantaka
  *
  */
+@Slf4j
 public class SimpleEmailService extends AmazoneClientBuilder {
 
 	/**
@@ -34,56 +33,6 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	}
 
 	/**
-	 * 複数のメールを送信します
-	 * 
-	 * @param values
-	 * @return
-	 */
-	public static List<EmailObject> sendEmail(List<EmailObject> values) {
-
-		AmazonSimpleEmailService client = buildSESClient();
-
-		for (EmailObject mail : values) {
-
-			try {
-
-				// Construct an object to contain the recipient address.
-				Destination destination = new Destination().withToAddresses(new String[] { mail.getTo() });
-
-				// Create the subject and body of the message.
-				Content subject = new Content().withData(mail.getSubject());
-				Content textBody = new Content().withData(mail.getBody());
-				Body body = new Body().withText(textBody);
-
-				// Create a message with the specified subject and body.
-				Message message = new Message().withSubject(subject).withBody(body);
-
-				// Assemble the email.
-				SendEmailRequest request = new SendEmailRequest().withSource(mail.getFrom())
-						.withDestination(destination).withMessage(message);
-
-				// Send the email.
-				SendEmailResult result = client.sendEmail(request);
-
-				mail.setResultHttpStatusCode(result.getSdkHttpMetadata().getHttpStatusCode());
-				mail.setResultMessageId(result.getMessageId());
-				mail.setResultRequestId(result.getSdkResponseMetadata().getRequestId());
-				out.println("Email sent!");
-
-			} catch (Exception ex) {
-
-				out.println("The email was not sent.");
-				out.println("Error message: " + ex.getMessage());
-
-			}
-
-		}
-
-		return values;
-
-	}
-
-	/**
 	 * メールを非同期で送信します
 	 * 
 	 * @param value
@@ -94,50 +43,85 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	}
 
 	/**
+	 * 複数のメールを送信します
+	 * 
+	 * @param values
+	 * @return
+	 */
+	public static List<EmailObject> sendEmail(List<EmailObject> values) {
+		AmazonSimpleEmailService client = buildSESClient();
+		return send(client, values);
+	}
+
+	/**
 	 * 複数のメールを非同期で送信します
 	 * 
 	 * @param values
 	 * @return
 	 */
-	public static void sendAsyncEmail(List<EmailObject> values) {
-
+	public static List<EmailObject> sendAsyncEmail(List<EmailObject> values) {
 		AmazonSimpleEmailServiceAsync client = buildAsyncSESClient();
+		return send(client, values);
+	}
 
+	/**
+	 * メールを送信します
+	 * @param client
+	 * @param values
+	 * @return
+	 */
+	private static List<EmailObject> send(AmazonSimpleEmailService client, List<EmailObject> values) {
+		
 		for (EmailObject mail : values) {
 
 			try {
 
-				// Construct an object to contain the recipient address.
-				Destination destination = new Destination().withToAddresses(new String[] { mail.getTo() });
-
-				// Create the subject and body of the message.
-				Content subject = new Content().withData(mail.getSubject());
-				Content textBody = new Content().withData(mail.getBody());
-				Body body = new Body().withText(textBody);
-
-				// Create a message with the specified subject and body.
-				Message message = new Message().withSubject(subject).withBody(body);
-
-				// Assemble the email.
-				SendEmailRequest request = new SendEmailRequest().withSource(mail.getFrom())
-						.withDestination(destination).withMessage(message);
+				// Assemble the SendEmailRequest.
+				SendEmailRequest request = toSendEmailResult(mail);
 
 				// Send the email.
-				Future<SendEmailResult> result = client.sendEmailAsync(request);
+				SendEmailResult result = client.sendEmail(request);
 
-				// mail.setResultHttpStatusCode(result.getSdkHttpMetadata().getHttpStatusCode());
-				// mail.setResultMessageId(result.getMessageId());
-				// mail.setResultRequestId(result.getSdkResponseMetadata().getRequestId());
-				out.println("Email sent!");
+				mail.setHttpStatusCode(result.getSdkHttpMetadata().getHttpStatusCode());
+				mail.setMessageId(result.getMessageId());
+				mail.setRequestId(result.getSdkResponseMetadata().getRequestId());
+				log.info("Email sent! :{}",mail);
 
 			} catch (Exception ex) {
 
-				out.println("The email was not sent.");
-				out.println("Error message: " + ex.getMessage());
+				log.error("The email was not sent.");
+				log.error("Error message: " + ex.getMessage());
 
 			}
 
 		}
+		return values;
+	}
+
+	/**
+	 * メールのリクエストを作成します
+	 * 
+	 * @param mail
+	 * @return
+	 */
+	private static SendEmailRequest toSendEmailResult(EmailObject mail) {
+
+		// Construct an object to contain the recipient address.
+		Destination destination = new Destination().withToAddresses(new String[] { mail.getTo() });
+
+		// Create the subject and body of the message.
+		Content subject = new Content().withData(mail.getSubject());
+		Content textBody = new Content().withData(mail.getBody());
+		Body body = new Body().withText(textBody);
+
+		// Create a message with the specified subject and body.
+		Message message = new Message().withSubject(subject).withBody(body);
+
+		// Assemble the email.
+		SendEmailRequest request = new SendEmailRequest().withSource(mail.getFrom()).withDestination(destination)
+				.withMessage(message);
+
+		return request;
 
 	}
 

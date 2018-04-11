@@ -1,23 +1,29 @@
 package io.hexaforce.aws.SQS;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.beanutils.BeanUtils;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageResult;
 import com.amazonaws.services.sqs.model.DeleteQueueRequest;
+import com.amazonaws.services.sqs.model.ListQueuesResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 
 import io.hexaforce.aws.AmazoneClientBuilder;
+import io.hexaforce.aws.S3.StorageObject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,50 +35,62 @@ import lombok.extern.slf4j.Slf4j;
 public class SimpleQueueService extends AmazoneClientBuilder {
 
 	/**
+	 * キューを作成します
+	 * 
 	 * @param value
 	 * @return
 	 */
 	public static QueueObject createQueue(QueueObject value) {
-		return createQueues(Arrays.asList(value)).get(0);
+		return createQueue(Arrays.asList(value)).get(0);
 	}
 
 	/**
+	 * 複数のキューを作成します
+	 * 
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> createQueues(List<QueueObject> values) {
+	public static List<QueueObject> createQueue(List<QueueObject> values) {
 		AmazonSQS sqs = buildSQSClient();
 
 		return values;
 	}
 
 	/**
+	 * キューを削除します
+	 * 
 	 * @param value
 	 * @return
 	 */
 	public static QueueObject deleteQueue(QueueObject value) {
-		return deleteQueues(Arrays.asList(value)).get(0);
+		return deleteQueue(Arrays.asList(value)).get(0);
 	}
 
 	/**
+	 * 複数のキューを削除します
+	 * 
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> deleteQueues(List<QueueObject> values) {
+	public static List<QueueObject> deleteQueue(List<QueueObject> values) {
 		AmazonSQS sqs = buildSQSClient();
 
 		return values;
 	}
 
 	/**
+	 * キューの一覧を返します
+	 * 
 	 * @return
 	 */
-	public static List<String> listQueueUrls() {
-		AmazonSQS sqs = buildSQSClient();
-		return sqs.listQueues().getQueueUrls();
+	public static List<String> listQueueUrls(AmazonSQS sqs) {
+		ListQueuesResult result = sqs.listQueues();
+		return result.getQueueUrls();
 	}
 
 	/**
+	 * メッセージを送信します
+	 * 
 	 * @param value
 	 * @return
 	 */
@@ -81,14 +99,16 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	}
 
 	/**
+	 * 複数のメッセージを送信します
+	 * 
 	 * @param values
 	 * @return
 	 */
 	public static List<QueueObject> sendMessage(List<QueueObject> values) {
-
 		AmazonSQS sqs = buildSQSClient();
 		for (QueueObject v : values) {
-			SendMessageResult result = sqs.sendMessage(v.getQueueUrl(), v.getMessageBody());
+			SendMessageResult result = sqs.sendMessage(v.getQueueUrl(), "");
+			//SendMessageResult result = sqs.sendMessage(v.getQueueUrl(), v.getMessageBody());
 			v.setMessageId(result.getMessageId());
 			v.setSequenceNumber(result.getSequenceNumber());
 			v.setHttpStatusCode(result.getSdkHttpMetadata().getHttpStatusCode());
@@ -98,28 +118,62 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	}
 
 	/**
+	 * メッセージを受信します
+	 * 
 	 * @param queueUrl
 	 * @return
 	 */
-	public static List<QueueObject> receiveMessage(String queueUrl) {
-
+	public static List<QueueObject> receiveMessage(String requestUrl) {
+		
 		AmazonSQS sqs = buildSQSClient();
-		ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
-		List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
-		List<QueueObject> queueObjectList = new ArrayList<>();
-		for (Message m : messages) {
-			QueueObject queueObject = new QueueObject();
-			queueObject.setQueueUrl(queueUrl);
-			queueObject.setMessageId(m.getMessageId());
-			queueObject.setMessageBody(m.getBody());
-			queueObject.setReceiptHandle(m.getReceiptHandle());
-			queueObjectList.add(queueObject);
+		
+		List<QueueObject> result = new ArrayList<>();
+		String queueUrl = availabilityQueueUrl(sqs, requestUrl);
+		if (queueUrl == null) {
+			return result;
 		}
-		return queueObjectList;
+		
+		try {
+			
+			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
+			List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
+			
+			for (Message message : messages) {
+
+				QueueObject o = new QueueObject();
+				o.setQueueUrl(queueUrl);
+				BeanUtils.copyProperties(o, message);
+				
+				result.add(o);
+			}
+			
+		} catch (Exception e) {
+			displayException(e);
+		}
+		
+		return result;
 
 	}
-
+	
 	/**
+	 * 接続URLを返します(妥当性の検証)
+	 * @param requestUrl
+	 * @return
+	 */
+	private static String availabilityQueueUrl(AmazonSQS sqs, String requestUrl) {
+		for (String queueUrl : listQueueUrls(sqs)) {
+			if (queueUrl.endsWith("/" + requestUrl)) {
+				return queueUrl;
+			}
+		}
+		log.error("It is not a valid queue name. {}", requestUrl);
+		return null;
+	}
+	
+	
+	/**
+	 * メッセージを削除します
+	 * 
 	 * @param value
 	 * @return
 	 */
@@ -128,6 +182,8 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	}
 
 	/**
+	 * 複数のメッセージを削除します
+	 * 
 	 * @param values
 	 * @return
 	 */

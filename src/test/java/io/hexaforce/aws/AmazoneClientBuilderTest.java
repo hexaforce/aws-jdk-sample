@@ -11,20 +11,19 @@ import com.amazonaws.services.s3.model.Bucket;
 import io.hexaforce.aws.S3.SimpleStorageService;
 
 public class AmazoneClientBuilderTest {
-	
+
 	@Test
 	@DisplayName("My 1st JUnit 5 test! 😎")
 	void myFirstTest(TestInfo testInfo) {
+		
 		// Calculator calculator = new Calculator();
-//		 assertEquals(2, calculator.add(1, 1), "1 + 1 should equal 2");
-		
-		
-		for (Bucket b :SimpleStorageService.listBucket()) {
+		// assertEquals(2, calculator.add(1, 1), "1 + 1 should equal 2");
+
+		for (Bucket b : SimpleStorageService.listBucket()) {
 			System.out.println(b);
 		}
-		
-		 assertEquals("My 1st JUnit 5 test! 😎", testInfo.getDisplayName(), () ->
-		 "TestInfo is injected correctly");
+
+		assertEquals("My 1st JUnit 5 test! 😎", testInfo.getDisplayName(), () -> "TestInfo is injected correctly");
 	}
-	
+
 }
