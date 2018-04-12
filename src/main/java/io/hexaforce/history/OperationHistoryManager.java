@@ -1,9 +1,14 @@
 package io.hexaforce.history;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Repository
-public interface OperationHistoryManager extends JpaRepository<OperationHistory, Integer> {
+public class OperationHistoryManager {
 
+	@Autowired
+	MailSendHistoryRepository mailSendHistoryRepository;
+	
+	public void aaa() {
+		
+	}
+	
 }

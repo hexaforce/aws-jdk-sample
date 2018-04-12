@@ -1,7 +1,0 @@
-spring:
-    datasource:
-        # DB設定
-        driver-class-name: com.mysql.jdbc.Driver
-        url: 'jdbc:mysql://localhost:3306/bunkyo?useUnicode=true&characterEncoding=utf8&useSSL=false'
-        username: bunkyo
-        password: bunkyo

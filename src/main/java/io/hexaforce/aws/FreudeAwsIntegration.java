@@ -7,4 +7,4 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @SpringBootApplication
 @EnableJpaAuditing
-class AuditingConfiguration {}
+class FreudeAwsIntegration {}

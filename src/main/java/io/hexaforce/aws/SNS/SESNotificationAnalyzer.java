@@ -18,11 +18,11 @@ public class SESNotificationAnalyzer {
 
 	public static void analyze(String body) {
 
-		try {
+		ObjectMapper jackson = new ObjectMapper().configure(
+				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+				false);
 
-			ObjectMapper jackson = new ObjectMapper().configure(
-					DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-					false);
+		try {
 
 			JsonNode root = trimIndention(jackson, body);
 

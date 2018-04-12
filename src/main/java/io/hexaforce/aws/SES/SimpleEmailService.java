@@ -1,5 +1,6 @@
 package io.hexaforce.aws.SES;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,8 +29,8 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static EmailObject sendEmail(EmailObject value) {
-		return sendEmail(Arrays.asList(value)).get(0);
+	public static EmailObject sendEmail(EmailObject mail) {
+		return sendEmail(Arrays.asList(mail)).get(0);
 	}
 
 	/**
@@ -38,8 +39,8 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static void sendAsyncEmail(EmailObject value) {
-		sendAsyncEmail(Arrays.asList(value));
+	public static EmailObject sendAsyncEmail(EmailObject mail) {
+		return sendAsyncEmail(Arrays.asList(mail)).get(0);
 	}
 
 	/**
@@ -48,9 +49,9 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<EmailObject> sendEmail(List<EmailObject> values) {
+	public static List<EmailObject> sendEmail(List<EmailObject> mails) {
 		AmazonSimpleEmailService client = buildSESClient();
-		return send(client, values);
+		return send(client, mails);
 	}
 
 	/**
@@ -59,20 +60,22 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<EmailObject> sendAsyncEmail(List<EmailObject> values) {
+	public static List<EmailObject> sendAsyncEmail(List<EmailObject> mails) {
 		AmazonSimpleEmailServiceAsync client = buildAsyncSESClient();
-		return send(client, values);
+		return send(client, mails);
 	}
 
 	/**
 	 * メールを送信します
 	 * @param client
-	 * @param values
+	 * @param mails
 	 * @return
 	 */
-	private static List<EmailObject> send(AmazonSimpleEmailService client, List<EmailObject> values) {
+	private static List<EmailObject> send(AmazonSimpleEmailService client, List<EmailObject> mails) {
 		
-		for (EmailObject mail : values) {
+		List<EmailObject> result =  new ArrayList<>();
+		
+		for (EmailObject mail : mails) {
 
 			try {
 
@@ -80,22 +83,27 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 				SendEmailRequest request = toSendEmailResult(mail);
 
 				// Send the email.
-				SendEmailResult result = client.sendEmail(request);
+				SendEmailResult sendEmailResult = client.sendEmail(request);
+				
+//				EmailObject o = new EmailObject();
+//				BeanUtils.copyProperties(o, mail);
+//				BeanUtils.copyProperties(o, sendEmailResult);
+//				result.add(o);
+				
+				mail.setHttpStatusCode(sendEmailResult.getSdkHttpMetadata().getHttpStatusCode());
+				mail.setMessageId(sendEmailResult.getMessageId());
+				mail.setRequestId(sendEmailResult.getSdkResponseMetadata().getRequestId());
+				result.add(mail);
+				log.info("Email sent! :{}", mail);
 
-				mail.setHttpStatusCode(result.getSdkHttpMetadata().getHttpStatusCode());
-				mail.setMessageId(result.getMessageId());
-				mail.setRequestId(result.getSdkResponseMetadata().getRequestId());
-				log.info("Email sent! :{}",mail);
-
-			} catch (Exception ex) {
-
-				log.error("The email was not sent.");
-				log.error("Error message: " + ex.getMessage());
-
+			} catch (Exception e) {
+				displayException(e);
 			}
 
 		}
-		return values;
+
+		return result;
+
 	}
 
 	/**
@@ -122,6 +130,17 @@ public class SimpleEmailService extends AmazoneClientBuilder {
 				.withMessage(message);
 
 		return request;
+
+	}
+	
+
+	/**
+	 * @param e
+	 */
+	private static void displayException(Exception e) {
+
+		log.error("The email was not sent.");
+		log.error("Error message: " + e.getMessage());
 
 	}
 
