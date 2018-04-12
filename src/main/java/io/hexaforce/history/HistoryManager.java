@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import io.hexaforce.aws.SNS.BounceObject;
 import io.hexaforce.aws.SNS.ComplaintObject;
@@ -44,6 +45,7 @@ public class HistoryManager {
 	 * @throws InterruptedException 
 	 * 
 	 */
+	@Scheduled(fixedDelay = 5 * 1000)
 	public void updateHistory() throws InterruptedException {
 		
 		// メッセージ全取得
