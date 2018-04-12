@@ -27,7 +27,6 @@ public class QueueObject {
     /** An MD5 digest of the non-URL-encoded message attribute string. */
     private String mD5OfMessageAttributes;
     
-	
 	private String requestId;
 	private String sequenceNumber;
 	private int httpStatusCode;

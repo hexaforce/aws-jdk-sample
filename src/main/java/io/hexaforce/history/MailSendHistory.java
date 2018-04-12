@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MailSendHistory extends AbstractEntity {
+	
 	String emailAddress;
 	@Enumerated(EnumType.STRING) HistoryType historyType;
 	String subject;
@@ -25,4 +26,5 @@ public class MailSendHistory extends AbstractEntity {
 	String bounceSubType;
 	Integer retryCount;
 	LocalDateTime nextRetry;
+	
 }

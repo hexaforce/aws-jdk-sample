@@ -36,7 +36,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	//取得されたメッセージが後続の検索から見えなくなる期間（秒単位）
 	private final Integer VISIBILITY_TIMEOUT = 60 * 5;
 
-	//送受信が完了するまでの、コール待機時間（秒）
+	//送受信が完了するまでの、コール待機時間（秒単位）
 	private final Integer WITHWAIT_TIME_SECONDS = 20;
 	
 	/**
