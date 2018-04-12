@@ -20,8 +20,8 @@ public class SESNotificationAnalyzer {
 
 		try {
 
-			ObjectMapper jackson = new ObjectMapper()
-					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+			ObjectMapper jackson = new ObjectMapper().configure(
+					DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
 					false);
 
 			JsonNode root = trimIndention(jackson, body);
@@ -88,7 +88,7 @@ public class SESNotificationAnalyzer {
 	}
 
 	/**
-	 * SESの送信通知のタイプを返します
+	 * SESの送信通知タイプを返します
 	 * @param root
 	 * @return
 	 */

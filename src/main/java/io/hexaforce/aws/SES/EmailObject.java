@@ -2,6 +2,11 @@ package io.hexaforce.aws.SES;
 
 import lombok.Data;
 
+/**
+ * DTO for AmazonSES
+ * @author tantaka
+ *
+ */
 @Data
 public class EmailObject {
 	

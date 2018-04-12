@@ -9,7 +9,7 @@ import com.amazonaws.services.s3.model.Owner;
 import lombok.Data;
 
 /**
- * 
+ * DTO for AmazonS3
  * @author tantaka
  *
  */

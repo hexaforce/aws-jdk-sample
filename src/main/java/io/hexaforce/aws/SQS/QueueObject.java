@@ -2,10 +2,14 @@ package io.hexaforce.aws.SQS;
 
 import lombok.Data;
 
+/**
+ * DTO for AmazonSQS
+ * @author tantaka
+ *
+ */
 @Data
 public class QueueObject {
 	
-
 	private String queueUrl;
 	
 	/**A unique identifier for the message. */
