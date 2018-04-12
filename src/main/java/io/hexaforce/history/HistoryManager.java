@@ -28,15 +28,18 @@ import io.hexaforce.aws.SQS.SimpleQueueService;
  */
 public class HistoryManager {
 
+	// SESのタイムフォーマット
 	private final DateTimeFormatter SES_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
+	
+	// キュー名
+	private final String QUEUE_NAME = "no-reply-mail-bunkyo";
+	
 	@Autowired
 	private SimpleQueueService SQS;
 
 	@Autowired
 	private MailSendHistoryRepository mailSendHistoryRepository;
 	
-
 	/**
 	 * @throws InterruptedException 
 	 * 
@@ -76,7 +79,7 @@ public class HistoryManager {
 		mailSendHistoryList = mailSendHistoryRepository.saveAll(mailSendHistoryList);
 
 		// 処理済みメッセージ削除
-		queueList = SQS.deleteMessage("no-reply-mail-bunkyo", queueList);
+		queueList = SQS.deleteMessage(QUEUE_NAME, queueList);
 
 	}
 	
@@ -128,7 +131,7 @@ public class HistoryManager {
 		
 		return mailSendHistoryList;
 	}
-
+	
 	/**
 	 * 現在ある全てのメッセージを取得します
 	 * @return
@@ -137,8 +140,8 @@ public class HistoryManager {
 	private List<QueueObject> receiveQueue() throws InterruptedException {
 		
 		List<QueueObject> queueListAll = new ArrayList<>(); 
-				
-		List<QueueObject> queueList = SQS.receiveMessage("no-reply-mail-bunkyo");
+		
+		List<QueueObject> queueList = SQS.receiveMessage(QUEUE_NAME);
 		
 		while(!queueList.isEmpty()) {
 			
@@ -146,7 +149,8 @@ public class HistoryManager {
 
 			TimeUnit.SECONDS.sleep(1);
 			
-			queueList = SQS.receiveMessage("no-reply-mail-bunkyo");
+			queueList = SQS.receiveMessage(QUEUE_NAME);
+			
 		}
 		
 		return queueListAll;

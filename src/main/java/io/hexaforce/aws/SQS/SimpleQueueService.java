@@ -22,7 +22,7 @@ import io.hexaforce.aws.AmazoneClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 
+ * S3ライブラリ
  * @author tantaka
  *
  */
@@ -30,6 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class SimpleQueueService extends AmazoneClientBuilder {
 
+	//一度に取得するメッセージの最大件数
+	private final Integer MAX_NUMBER_OF_MESSAGES = 10;
+
+	//取得されたメッセージが後続の検索から見えなくなる期間（秒単位）
+	private final Integer VISIBILITY_TIMEOUT = 60 * 5;
+
+	//送受信が完了するまでの、コール待機時間（秒）
+	private final Integer WITHWAIT_TIME_SECONDS = 20;
+	
 	/**
 	 * キューを作成します
 	 * 
@@ -162,8 +171,12 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 		}
 
 		try {
-
-			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
+			
+			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl)
+					.withMaxNumberOfMessages(MAX_NUMBER_OF_MESSAGES)
+					.withVisibilityTimeout(VISIBILITY_TIMEOUT)
+					.withWaitTimeSeconds(WITHWAIT_TIME_SECONDS);
+			
 			List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
 
 			for (Message message : messages) {
