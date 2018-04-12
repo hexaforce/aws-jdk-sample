@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -27,6 +28,7 @@ import io.hexaforce.aws.AmazoneClientBuilder;
  * @author tantaka
  *
  */
+@Component
 public class SimpleStorageService extends AmazoneClientBuilder {
 
 	/**
@@ -35,7 +37,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param bucketName
 	 * @return Bucket
 	 */
-	public static StorageObject createBucket(String bucketName) {
+	public StorageObject createBucket(String bucketName) {
 		return createBucket(Arrays.asList(bucketName)).get(0);
 	}
 
@@ -45,7 +47,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param bucketNames
 	 * @return
 	 */
-	public static List<StorageObject> createBucket(List<String> bucketNames) {
+	public List<StorageObject> createBucket(List<String> bucketNames) {
 		AmazonS3 s3 = buildS3Client();
 		List<StorageObject> result = new ArrayList<>();
 		for (String bucketName : bucketNames) {
@@ -66,7 +68,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @param bucketName
 	 */
-	public static void deleteBucket(String bucketName) {
+	public void deleteBucket(String bucketName) {
 		deleteBucket(Arrays.asList(bucketName));
 	}
 
@@ -75,7 +77,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @param bucketNames
 	 */
-	public static void deleteBucket(List<String> bucketNames) {
+	public void deleteBucket(List<String> bucketNames) {
 		AmazonS3 s3 = buildS3Client();
 		for (String bucketName : bucketNames) {
 			try {
@@ -91,7 +93,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @return
 	 */
-	public static List<Bucket> listBucket() {
+	public List<Bucket> listBucket() {
 		AmazonS3 s3 = buildS3Client();
 		return s3.listBuckets();
 	}
@@ -102,7 +104,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param bucketName
 	 * @param prefix
 	 */
-	public static List<StorageObject> listObject(String bucketName, String prefix) {
+	public List<StorageObject> listObject(String bucketName, String prefix) {
 		AmazonS3 s3 = buildS3Client();
 		ListObjectsRequest serchRequest = new ListObjectsRequest().withBucketName(bucketName).withPrefix(prefix);
 		List<StorageObject> result = new ArrayList<>();
@@ -123,7 +125,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @param value
 	 */
-	public static StorageObject putObject(StorageObject value) {
+	public StorageObject putObject(StorageObject value) {
 		return putObject(Arrays.asList(value)).get(0);
 	}
 
@@ -133,7 +135,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<StorageObject> putObject(List<StorageObject> values) {
+	public List<StorageObject> putObject(List<StorageObject> values) {
 		AmazonS3 s3 = buildS3Client();
 
 		for (StorageObject v : values) {
@@ -166,7 +168,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static StorageObject getObject(StorageObject value) {
+	public StorageObject getObject(StorageObject value) {
 		return getObject(Arrays.asList(value)).get(0);
 	}
 
@@ -176,7 +178,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<StorageObject> getObject(List<StorageObject> values) {
+	public List<StorageObject> getObject(List<StorageObject> values) {
 		AmazonS3 s3 = buildS3Client();
 		for (StorageObject v : values) {
 			try {
@@ -193,7 +195,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @param value
 	 */
-	public static void deleteObject(StorageObject value) {
+	public void deleteObject(StorageObject value) {
 		deleteObject(Arrays.asList(value));
 	}
 
@@ -202,7 +204,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * 
 	 * @param values
 	 */
-	public static void deleteObject(List<StorageObject> values) {
+	public void deleteObject(List<StorageObject> values) {
 		AmazonS3 s3 = buildS3Client();
 		for (StorageObject v : values) {
 			try {
@@ -220,7 +222,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @param e
 	 * @throws IOException
 	 */
-	private static void displayException(Exception e) {
+	private void displayException(Exception e) {
 
 		if (e instanceof AmazonServiceException) {
 			AmazonServiceException ase = (AmazonServiceException) e;
@@ -252,7 +254,7 @@ public class SimpleStorageService extends AmazoneClientBuilder {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unused")
-	private static void displayTextInputStream(InputStream input) throws IOException {
+	private void displayTextInputStream(InputStream input) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		while (true) {
 			String line = reader.readLine();
