@@ -26,6 +26,7 @@ public class AmazoneClientBuilder {
 	final static ProfileCredentialsProvider credentialsProviderS3 = new ProfileCredentialsProvider("S3");
 	
 	/**
+	 * S3クライアント
 	 * @return
 	 */
 	protected static AmazonS3 buildS3Client() {
@@ -53,6 +54,7 @@ public class AmazoneClientBuilder {
 	}
 	
 	/**
+	 * S3暗号化クライアント
 	 * @return
 	 */
 	protected static AmazonS3 buildEncryptionS3Client() {
@@ -78,9 +80,11 @@ public class AmazoneClientBuilder {
 		}
 
 	}
+	
 	final static ProfileCredentialsProvider credentialsProviderSES = new ProfileCredentialsProvider("SES");
 	
 	/**
+	 * SESクライアント
 	 * @return
 	 */
 	protected static AmazonSimpleEmailService buildSESClient() {
@@ -109,6 +113,7 @@ public class AmazoneClientBuilder {
 	}
 
 	/**
+	 * SES非同期クライアント
 	 * @return
 	 */
 	protected static AmazonSimpleEmailServiceAsync buildAsyncSESClient() {
@@ -141,6 +146,7 @@ public class AmazoneClientBuilder {
 	final static ProfileCredentialsProvider credentialsProviderSQS = new ProfileCredentialsProvider("SQS");
 
 	/**
+	 * SQSクライアント
 	 * @return
 	 */
 	protected static AmazonSQS buildSQSClient() {
@@ -166,6 +172,7 @@ public class AmazoneClientBuilder {
 	}
 	
 	/**
+	 * SQS非同期クライアント
 	 * @return
 	 */
 	protected static AmazonSQS buildAsyncSQSClient() {

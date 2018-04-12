@@ -16,7 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SESNotificationAnalyzer {
 
-	public static void analyze(String body) {
+	/**
+	 * SESの通知改正
+	 * @param body
+	 * @return
+	 */
+	public static SESNotificationResult analyze(String body) {
 
 		ObjectMapper jackson = new ObjectMapper().configure(
 				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
@@ -28,7 +33,7 @@ public class SESNotificationAnalyzer {
 
 			NotificationType type = checkNotificationType(root);
 			if (type == null) {
-				return;
+				return null;
 			}
 
 			MailObject mailObject = jackson.readValue(root.get("mail").toString(), MailObject.class);
@@ -37,38 +42,36 @@ public class SESNotificationAnalyzer {
 			switch (type) {
 
 			case Delivery:
-
 				String delivery = root.get("delivery").toString();
 				DeliveryObject deliveryObject = jackson.readValue(delivery, DeliveryObject.class);
-
 				log.debug("Delivery :{}", deliveryObject);
-				break;
+				
+				return new SESNotificationResult(type, mailObject, deliveryObject);
 
 			case Bounce:
-
 				String bounce = root.get("bounce").toString();
 				BounceObject bounceObject = jackson.readValue(bounce, BounceObject.class);
-				
 				log.warn("Bounce :{}", bounceObject);
-				break;
+				
+				return new SESNotificationResult(type, mailObject, bounceObject);
 
 			case Complaint:
-
 				String complaint = root.get("complaint").toString();
 				ComplaintObject complaintObject = jackson.readValue(complaint, ComplaintObject.class);
-				
 				log.error("Complaint :{}", complaintObject);
-				break;
+				
+				return new SESNotificationResult(type, mailObject, complaintObject);
 
 			default:
 
-				break;
+				return null;
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		return null;
+		
 	}
 
 	/**

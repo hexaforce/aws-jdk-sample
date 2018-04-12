@@ -7,12 +7,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
-@ToString
+@Data
+@EqualsAndHashCode(callSuper=false)
+@NoArgsConstructor
 @AllArgsConstructor
 public class MailSendHistory extends AbstractEntity {
 	String emailAddress;

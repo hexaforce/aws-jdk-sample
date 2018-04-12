@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@Component
 public class SimpleQueueService extends AmazoneClientBuilder {
 
 	/**
@@ -34,7 +36,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static QueueObject createQueue(String queueName) {
+	public QueueObject createQueue(String queueName) {
 		return createQueue(Arrays.asList(queueName)).get(0);
 	}
 
@@ -44,7 +46,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> createQueue(List<String> queueNames) {
+	public List<QueueObject> createQueue(List<String> queueNames) {
 		AmazonSQS sqs = buildSQSClient();
 		List<QueueObject> result = new ArrayList<>();
 		try {
@@ -66,7 +68,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static QueueObject deleteQueue(String queueName) {
+	public QueueObject deleteQueue(String queueName) {
 		return deleteQueue(Arrays.asList(queueName)).get(0);
 	}
 
@@ -76,7 +78,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> deleteQueue(List<String> queueNames) {
+	public List<QueueObject> deleteQueue(List<String> queueNames) {
 		AmazonSQS sqs = buildSQSClient();
 		List<QueueObject> result = new ArrayList<>();
 		try {
@@ -97,7 +99,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * 
 	 * @return
 	 */
-	public static List<String> listQueueUrls(AmazonSQS sqs) {
+	public List<String> listQueueUrls(AmazonSQS sqs) {
 		ListQueuesResult result = sqs.listQueues();
 		return result.getQueueUrls();
 	}
@@ -108,7 +110,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static QueueObject sendMessage(String queueName, QueueObject message) {
+	public QueueObject sendMessage(String queueName, QueueObject message) {
 		return sendMessage(queueName, Arrays.asList(message)).get(0);
 	}
 
@@ -118,7 +120,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> sendMessage(String queueName, List<QueueObject> messages) {
+	public List<QueueObject> sendMessage(String queueName, List<QueueObject> messages) {
 
 		AmazonSQS sqs = buildSQSClient();
 
@@ -149,10 +151,10 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param queueUrl
 	 * @return
 	 */
-	public static List<QueueObject> receiveMessage(String queueName) {
-		
+	public List<QueueObject> receiveMessage(String queueName) {
+
 		AmazonSQS sqs = buildSQSClient();
-		
+
 		List<QueueObject> result = new ArrayList<>();
 		String queueUrl = availabilityQueueUrl(sqs, queueName);
 		if (queueUrl == null) {
@@ -160,21 +162,21 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 		}
 
 		try {
-			
+
 			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(queueUrl);
 			List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
-			
+
 			for (Message message : messages) {
 				QueueObject o = new QueueObject();
 				o.setQueueUrl(queueUrl);
 				BeanUtils.copyProperties(o, message);
 				result.add(o);
 			}
-			
+
 		} catch (Exception e) {
 			displayException(e);
 		}
-		
+
 		return result;
 
 	}
@@ -185,7 +187,7 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param value
 	 * @return
 	 */
-	public static QueueObject deleteMessage(String queueName, QueueObject message) {
+	public QueueObject deleteMessage(String queueName, QueueObject message) {
 		return deleteMessage(queueName, Arrays.asList(message)).get(0);
 	}
 
@@ -195,16 +197,16 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 	 * @param values
 	 * @return
 	 */
-	public static List<QueueObject> deleteMessage(String queueName, List<QueueObject> messages) {
-		
+	public List<QueueObject> deleteMessage(String queueName, List<QueueObject> messages) {
+
 		AmazonSQS sqs = buildSQSClient();
-		
+
 		List<QueueObject> result = new ArrayList<>();
 		String queueUrl = availabilityQueueUrl(sqs, queueName);
 		if (queueUrl == null) {
 			return result;
 		}
-		
+
 		try {
 			for (QueueObject message : messages) {
 				DeleteMessageResult deleteMessageResult = sqs.deleteMessage(queueUrl, message.getReceiptHandle());
@@ -216,17 +218,18 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 		} catch (Exception e) {
 			displayException(e);
 		}
-		
+
 		return result;
 
 	}
-	
+
 	/**
 	 * 接続URLを返します
+	 * 
 	 * @param requestUrl
 	 * @return
 	 */
-	private static String availabilityQueueUrl(AmazonSQS sqs, String queueName) {
+	private String availabilityQueueUrl(AmazonSQS sqs, String queueName) {
 		for (String queueUrl : listQueueUrls(sqs)) {
 			if (queueUrl.endsWith("/" + queueName)) {
 				return queueUrl;
@@ -235,81 +238,88 @@ public class SimpleQueueService extends AmazoneClientBuilder {
 		log.error("It is not a valid queue name. {}", queueName);
 		return null;
 	}
-	
-//	public static void main(String[] args) {
-//
-//		AmazonSQS sqs = buildSQSClient();
-//
-//		log.info("===========================================");
-//		log.info("Getting Started with Amazon SQS");
-//		log.info("===========================================\n");
-//
-//		try {
-//
-//			// Create a queue
-//			log.info("Creating a new SQS queue called MyQueue.\n");
-//			CreateQueueRequest createQueueRequest = new CreateQueueRequest("MyQueue");
-//			String myQueueUrl = sqs.createQueue(createQueueRequest).getQueueUrl();
-//
-//			// List queues
-//			log.info("Listing all queues in your account.\n");
-//			for (String queueUrl : sqs.listQueues().getQueueUrls()) {
-//				log.info("  QueueUrl: " + queueUrl);
-//			}
-//			log.info("");
-//
-//			// Send a message
-//			log.info("Sending a message to MyQueue.\n");
-//			sqs.sendMessage(new SendMessageRequest(myQueueUrl, "This is my message text."));
-//
-//			// Receive messages
-//			log.info("Receiving messages from MyQueue.\n");
-//			ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest(myQueueUrl);
-//			List<Message> messages = sqs.receiveMessage(receiveMessageRequest).getMessages();
-//			for (Message message : messages) {
-//				log.info("  Message");
-//				log.info("    MessageId:     " + message.getMessageId());
-//				log.info("    ReceiptHandle: " + message.getReceiptHandle());
-//				log.info("    MD5OfBody:     " + message.getMD5OfBody());
-//				log.info("    Body:          " + message.getBody());
-//				for (Entry<String, String> entry : message.getAttributes().entrySet()) {
-//					log.info("  Attribute");
-//					log.info("    Name:  " + entry.getKey());
-//					log.info("    Value: " + entry.getValue());
-//				}
-//			}
-//			log.info("");
-//
-//			// Delete a message
-//			log.info("Deleting a message.\n");
-//			String messageReceiptHandle = messages.get(0).getReceiptHandle();
-//			sqs.deleteMessage(new DeleteMessageRequest(myQueueUrl, messageReceiptHandle));
-//
-//			// Delete a queue
-//			log.info("Deleting the test queue.\n");
-//			sqs.deleteQueue(new DeleteQueueRequest(myQueueUrl));
-//
-//		} catch (AmazonServiceException ase) {
-//
-//			log.error("Caught an AmazonServiceException, which means your request made it "
-//					+ "to Amazon SQS, but was rejected with an error response for some reason.");
-//			log.error("Error Message:    " + ase.getMessage());
-//			log.error("HTTP Status Code: " + ase.getStatusCode());
-//			log.error("AWS Error Code:   " + ase.getErrorCode());
-//			log.error("Error Type:       " + ase.getErrorType());
-//			log.error("Request ID:       " + ase.getRequestId());
-//
-//		} catch (AmazonClientException ace) {
-//
-//			log.error("Caught an AmazonClientException, which means the client encountered "
-//					+ "a serious internal problem while trying to communicate with SQS, such as not "
-//					+ "being able to access the network.");
-//			log.error("Error Message: " + ace.getMessage());
-//
-//		}
-//	}
 
-	private static void displayException(Exception e) {
+	// public static void main(String[] args) {
+	//
+	// AmazonSQS sqs = buildSQSClient();
+	//
+	// log.info("===========================================");
+	// log.info("Getting Started with Amazon SQS");
+	// log.info("===========================================\n");
+	//
+	// try {
+	//
+	// // Create a queue
+	// log.info("Creating a new SQS queue called MyQueue.\n");
+	// CreateQueueRequest createQueueRequest = new CreateQueueRequest("MyQueue");
+	// String myQueueUrl = sqs.createQueue(createQueueRequest).getQueueUrl();
+	//
+	// // List queues
+	// log.info("Listing all queues in your account.\n");
+	// for (String queueUrl : sqs.listQueues().getQueueUrls()) {
+	// log.info(" QueueUrl: " + queueUrl);
+	// }
+	// log.info("");
+	//
+	// // Send a message
+	// log.info("Sending a message to MyQueue.\n");
+	// sqs.sendMessage(new SendMessageRequest(myQueueUrl, "This is my message
+	// text."));
+	//
+	// // Receive messages
+	// log.info("Receiving messages from MyQueue.\n");
+	// ReceiveMessageRequest receiveMessageRequest = new
+	// ReceiveMessageRequest(myQueueUrl);
+	// List<Message> messages =
+	// sqs.receiveMessage(receiveMessageRequest).getMessages();
+	// for (Message message : messages) {
+	// log.info(" Message");
+	// log.info(" MessageId: " + message.getMessageId());
+	// log.info(" ReceiptHandle: " + message.getReceiptHandle());
+	// log.info(" MD5OfBody: " + message.getMD5OfBody());
+	// log.info(" Body: " + message.getBody());
+	// for (Entry<String, String> entry : message.getAttributes().entrySet()) {
+	// log.info(" Attribute");
+	// log.info(" Name: " + entry.getKey());
+	// log.info(" Value: " + entry.getValue());
+	// }
+	// }
+	// log.info("");
+	//
+	// // Delete a message
+	// log.info("Deleting a message.\n");
+	// String messageReceiptHandle = messages.get(0).getReceiptHandle();
+	// sqs.deleteMessage(new DeleteMessageRequest(myQueueUrl,
+	// messageReceiptHandle));
+	//
+	// // Delete a queue
+	// log.info("Deleting the test queue.\n");
+	// sqs.deleteQueue(new DeleteQueueRequest(myQueueUrl));
+	//
+	// } catch (AmazonServiceException ase) {
+	//
+	// log.error("Caught an AmazonServiceException, which means your request made it
+	// "
+	// + "to Amazon SQS, but was rejected with an error response for some reason.");
+	// log.error("Error Message: " + ase.getMessage());
+	// log.error("HTTP Status Code: " + ase.getStatusCode());
+	// log.error("AWS Error Code: " + ase.getErrorCode());
+	// log.error("Error Type: " + ase.getErrorType());
+	// log.error("Request ID: " + ase.getRequestId());
+	//
+	// } catch (AmazonClientException ace) {
+	//
+	// log.error("Caught an AmazonClientException, which means the client
+	// encountered "
+	// + "a serious internal problem while trying to communicate with SQS, such as
+	// not "
+	// + "being able to access the network.");
+	// log.error("Error Message: " + ace.getMessage());
+	//
+	// }
+	// }
+
+	private void displayException(Exception e) {
 
 		if (e instanceof AmazonServiceException) {
 			AmazonServiceException ase = (AmazonServiceException) e;

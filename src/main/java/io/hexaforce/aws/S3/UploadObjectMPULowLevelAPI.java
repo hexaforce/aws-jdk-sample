@@ -16,13 +16,14 @@ import com.amazonaws.services.s3.model.UploadPartRequest;
 import io.hexaforce.aws.AmazoneClientBuilder;
 
 /**
+ * [MPU]低レベルAPIファイルトランスファ
  * @author tantaka
  *
  */
 public class UploadObjectMPULowLevelAPI extends AmazoneClientBuilder {
 
 	/**
-	 * サイズ制限を回避して容量の大きなファイルをアップロードします
+	 * S3サイズ制限を回避して容量の大きなファイルをアップロードします
 	 * 
 	 * @param existingBucketName
 	 * @param keyName
